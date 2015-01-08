@@ -8,7 +8,7 @@ class Model{
 
   public static function query(){
     $proxy = new PatchedProxy(
-      ORM::for_table(static::$table)
+      \ORM::for_table(static::$table)
     );
 
     $proxy->_patchMethod('find_one', function($orm){
@@ -32,7 +32,7 @@ class Model{
 
   public static function all(){
     $ret = [];
-    $records = ORM::for_table(static::$table)
+    $records = \ORM::for_table(static::$table)
       ->find_many();
     foreach($records as $r){
       $ret[] = new static($r);
@@ -48,7 +48,7 @@ class Model{
   }
 
   public static function create(){
-    $record = ORM::for_table(static::$table)->create(); 
+    $record = \ORM::for_table(static::$table)->create(); 
     return new static($record);
   }
 
