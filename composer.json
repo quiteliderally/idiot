@@ -1,0 +1,19 @@
+{
+    "name": "quiteliderally/idiot",
+    "description": "Stupid Model Wrapper for Idiorm",
+    "require": {
+        "j4mie/idiorm": "~1.5"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tim Ariyeh",
+            "email": "tim.ariyeh@gmail.com"
+        }
+    ],
+    "autoload": {
+      "psr-4": {
+        "Idiot\\": "lib"
+      }
+    }
+}
