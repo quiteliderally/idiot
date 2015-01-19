@@ -5,6 +5,8 @@ namespace Idiot;
 class Model{
   protected static $table = '';
   protected $record = null;
+  protected $getters = [];
+  protected $setters = [];
 
   public static function query(){
     $proxy = new PatchedProxy(
@@ -57,7 +59,7 @@ class Model{
       unset($properties['id']);
     }
     foreach($properties as $k=>$v){
-      $this->record->$k = $v;
+      $this->set($k, $v);
     }
   }
 
@@ -69,16 +71,42 @@ class Model{
     return $this->record->delete();
   }
 
+  public function handleSet($field, $cb){
+    $this->setters[$field] = $cb;
+  }
+
+  public function handleGet($field, $cb){
+    $this->getters[$field] = $cb;
+  }
+
+  public function set($field, $value){
+    if(isset($this->setters[$field])){
+      return call_user_func($this->setters[$field], $this, $field, $value);
+    }
+    else{
+      return $this->record->{$field} = $value;
+    }
+  }
+
+  public function get($field){
+    if(isset($this->getters[$field])){
+      return call_user_func($this->getters[$field], $this, $field);
+    }
+    else{
+      return $this->record->{$field};
+    }
+  }
+
   public function __construct($record){
     $this->record = $record;
   }
 
   public function __get($property){
-    return $this->record->$property;
+    return $this->get($property);
   }
 
   public function __set($property, $value){
-    return $this->record->$property = $value;
+    return $this->set($property, $value);
   }
 
   public function __isset($property){
