@@ -32,6 +32,14 @@ class Model{
     return $proxy;
   }
 
+  public static function froArray($data=[]){
+    $ret = \ORM::for_table(static::$table);
+    foreach($data as $k=>$v){
+      $ret->$k = $v;
+    }
+    return $ret;
+  }
+
   public static function all(){
     $ret = [];
     $records = \ORM::for_table(static::$table)
