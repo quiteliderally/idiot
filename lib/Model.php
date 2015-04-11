@@ -9,6 +9,10 @@ class Model{
   protected $setters = [];
 
   public static function query(){
+    return self::rawQuery();
+  }
+
+  public static function rawQuery(){
     $proxy = new PatchedProxy(
       \ORM::for_table(static::$table)
     );
