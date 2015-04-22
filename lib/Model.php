@@ -50,7 +50,7 @@ class Model{
     foreach($data as $k=>$v){
       $ret->$k = $v;
     }
-    return $ret;
+    return new static($ret);
   }
 
   public static function all(){
