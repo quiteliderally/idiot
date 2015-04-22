@@ -4,6 +4,7 @@ namespace Idiot;
 
 class Model{
   protected static $table = '';
+  protected static $connection = \ORM::DEFAULT_CONNECTION;
   protected $record = null;
   protected $getters = [];
   protected $setters = [];
@@ -14,13 +15,17 @@ class Model{
 
   public static function rawQuery(){
     $proxy = new PatchedProxy(
-      \ORM::for_table(static::$table)
+      \ORM::for_table(static::$table, static::$connection)
     );
 
     $proxy->_patchMethod('find_one', function($orm){
       $record = $orm->find_one();
       if($record){
-        return new static($record);
+        $ret = new static($record);
+        if(method_exists($ret, 'initialize')){
+          $ret->initialize();
+        }
+        return $ret;
       }
     });
 
@@ -28,7 +33,11 @@ class Model{
       $ret = [];
       $records = $orm->find_many();
       foreach($records as $r){
-        $ret[] = new static($r);
+        $r = new static($r);
+        if(method_exists($r, 'initialize')){
+          $r->initialize();
+        }
+        $ret[] = $r;
       }
       return $ret;
     });
@@ -36,8 +45,8 @@ class Model{
     return $proxy;
   }
 
-  public static function froArray($data=[]){
-    $ret = \ORM::for_table(static::$table);
+  public static function fromArray($data=[]){
+    $ret = \ORM::for_table(static::$table, static::$connection);
     foreach($data as $k=>$v){
       $ret->$k = $v;
     }
@@ -46,7 +55,7 @@ class Model{
 
   public static function all(){
     $ret = [];
-    $records = \ORM::for_table(static::$table)
+    $records = \ORM::for_table(static::$table, static::$connection)
       ->find_many();
     foreach($records as $r){
       $ret[] = new static($r);
@@ -62,7 +71,7 @@ class Model{
   }
 
   public static function create(){
-    $record = \ORM::for_table(static::$table)->create(); 
+    $record = \ORM::for_table(static::$table, static::$connection)->create(); 
     return new static($record);
   }
 
@@ -123,5 +132,9 @@ class Model{
 
   public function __isset($property){
     return isset($this->record->$property);
+  }
+
+  public function get_db(){
+    return \ORM::get_db(static::$connection);
   }
 }
