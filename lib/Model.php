@@ -4,10 +4,15 @@ namespace Idiot;
 
 class Model{
   protected static $table = '';
+  protected static $processors = [];
   protected static $connection = \ORM::DEFAULT_CONNECTION;
   protected $record = null;
   protected $getters = [];
   protected $setters = [];
+
+  public static function addProcessor($cb){
+    static::$processors[] = $cb;
+  }
 
   public static function query(){
     return self::rawQuery();
@@ -25,6 +30,9 @@ class Model{
         if(method_exists($ret, 'initialize')){
           $ret->initialize();
         }
+        foreach(static::$processors as $p){
+          $ret = call_user_func($p, $ret);
+        }
         return $ret;
       }
     });
@@ -36,6 +44,9 @@ class Model{
         $r = new static($r);
         if(method_exists($r, 'initialize')){
           $r->initialize();
+        }
+        foreach(static::$processors as $p){
+          $r = call_user_func($p, $r);
         }
         $ret[] = $r;
       }
@@ -72,7 +83,11 @@ class Model{
 
   public static function create(){
     $record = \ORM::for_table(static::$table, static::$connection)->create(); 
-    return new static($record);
+    $obj = new static($record);
+    foreach(static::$processors as $p){
+      $obj = call_user_func($p, $obj);
+    }
+    return $obj;
   }
 
   public function update($properties=[]){
