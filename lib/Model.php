@@ -27,11 +27,11 @@ class Model{
       $record = $orm->find_one();
       if($record){
         $ret = new static($record);
-        if(method_exists($ret, 'initialize')){
-          $ret->initialize();
-        }
         foreach(static::$processors as $p){
           $ret = call_user_func($p, $ret);
+        }
+        if(method_exists($ret, 'initialize')){
+          $ret->initialize();
         }
         return $ret;
       }
@@ -42,11 +42,11 @@ class Model{
       $records = $orm->find_many();
       foreach($records as $r){
         $r = new static($r);
-        if(method_exists($r, 'initialize')){
-          $r->initialize();
-        }
         foreach(static::$processors as $p){
           $r = call_user_func($p, $r);
+        }
+        if(method_exists($r, 'initialize')){
+          $r->initialize();
         }
         $ret[] = $r;
       }
